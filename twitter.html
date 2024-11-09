@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>MiniSocial DApp</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.3.4/dist/web3.min.js"></script>
+<style>
+    /* Set the background color of the page to dark blue */
+    body {
+        background-color: #00274d;
+        color: #ffffff;
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+
+    /* Style the header */
+    h1 {
+        color: #ffffff;
+    }
+
+    /* Style the buttons */
+    button {
+        background-color: #ffffff;
+        color: #00274d;
+        padding: 10px 20px;
+        margin: 10px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #cccccc;
+    }
+
+    /* Style the input fields */
+    input[type="text"], input[type="number"] {
+        width: 80%;
+        padding: 15px;
+        margin: 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 1px solid #cccccc;
+    }
+
+    /* Make the message input larger */
+    #messageInput {
+        width: 700px;
+        height: 70px;
+    }
+
+    #postIdInput {
+        width: 200px;
+        height: 40px;
+    }
+
+    #newMessageInput {
+        width: 700px;
+        height: 70px;
+    }
+
+    /* Style the status section */
+    #status {
+        font-weight: bold;
+        margin-top: 20px;
+    }
+</style>
+</head>
+<body>
+<h1>MiniSocial DApp</h1>
+
+<!-- Buttons for actions -->
+<button onclick="publishPost();">Publish Post</button>
+<button onclick="getPost();">Get Post</button>
+<button onclick="likePost();">Like Post</button>
+<button onclick="dislikePost();">Dislike Post</button>
+<button onclick="modifyPost();">Modify Post</button>
+
+<br /><br />
+<!-- Input fields -->
+<div>
+    <label>Message :</label><input type="text" id="messageInput">
+</div>
+<div>
+    <label>Post ID :</label><input type="number" id="postIdInput">
+</div>
+<div>
+    <label>New Message :</label><input type="text" id="newMessageInput">
+</div>
+
+<br />
+Status: <span id="status">Loading...</span>
+<script type="text/javascript">
+async function loadWeb3() {
+    if (window.ethereum) {
+        window.web3 = new Web3(window.ethereum);
+        await window.ethereum.enable();
+    } else {
+        alert("Please install MetaMask to use this DApp!");
+    }
+}
+
+async function loadContract() {
+    return await new window.web3.eth.Contract(
+        [
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "postId",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "dislikePost",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "postId",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "likePost",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "postId",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "newMessage",
+                        "type": "string"
+                    }
+                ],
+                "name": "modifyPost",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "anonymous": false,
+                "inputs": [
+                    {
+                        "indexed": true,
+                        "internalType": "address",
+                        "name": "author",
+                        "type": "address"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "uint256",
+                        "name": "postId",
+                        "type": "uint256"
+                    },
+                    {
+                        "indexed": false,
+                        "internalType": "string",
+                        "name": "message",
+                        "type": "string"
+                    }
+                ],
+                "name": "NewPost",
+                "type": "event"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "_message",
+                        "type": "string"
+                    }
+                ],
+                "name": "publishPost",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "index",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "getPost",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "getTotalPosts",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "postDislikes",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "postLikes",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+        ],
+        '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0'  // Replace with your contract address
+    );
+}
+
+async function publishPost() {
+    const message = document.getElementById('messageInput').value;
+    updateStatus(`Publishing post: ${message}`);
+    const account = await getCurrentAccount();
+    await window.contract.methods.publishPost(message).send({ from: account });
+    updateStatus("Post published successfully.");
+}
+
+async function getPost() {
+    const postId = document.getElementById('postIdInput').value;
+    updateStatus(`Fetching post ID: ${postId}`);
+    const post = await window.contract.methods.getPost(postId).call();
+    updateStatus(`Post: ${post[0]}, Author: ${post[1]}, Likes: ${post[2]}, Dislikes: ${post[3]}`);
+}
+
+async function likePost() {
+    const postId = document.getElementById('postIdInput').value;
+    updateStatus(`Liking post ID: ${postId}`);
+    const account = await getCurrentAccount();
+    await window.contract.methods.likePost(postId).send({ from: account });
+    updateStatus("Post liked successfully.");
+}
+
+async function dislikePost() {
+    const postId = document.getElementById('postIdInput').value;
+    updateStatus(`Disliking post ID: ${postId}`);
+    const account = await getCurrentAccount();
+    await window.contract.methods.dislikePost(postId).send({ from: account });
+    updateStatus("Post disliked successfully.");
+}
+
+async function modifyPost() {
+    const postId = document.getElementById('postIdInput').value;
+    const newMessage = document.getElementById('newMessageInput').value;
+    updateStatus(`Modifying post ID: ${postId} with new message: ${newMessage}`);
+    const account = await getCurrentAccount();
+    await window.contract.methods.modifyPost(postId, newMessage).send({ from: account });
+    updateStatus("Post modified successfully.");
+}
+
+async function getCurrentAccount() {
+    const accounts = await window.web3.eth.getAccounts();
+    return accounts[0];
+}
+
+async function load() {
+    await loadWeb3();
+    window.contract = await loadContract();
+    updateStatus("Ready!");
+}
+
+function updateStatus(message) {
+    const statusEl = document.getElementById("status");
+    statusEl.innerHTML = message;
+    console.log(message);
+}
+
+load();
+</script>
+</body>
+</html>
