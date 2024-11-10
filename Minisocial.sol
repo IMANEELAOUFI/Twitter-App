@@ -12,14 +12,13 @@ contract MiniSocial {
     }
 
     Post[] private posts;
-    mapping(uint => address) public postLikes;
-    mapping(uint => address) public postDislikes;
+    mapping(address => mapping(uint => bool)) public likedPosts;
+    mapping(address => mapping(uint => bool)) public dislikedPosts;
 
     // Event for new post
-    event NewPost(address indexed author, uint postId, string message);
+    event NewPost(address indexed author, uint postIndex, string message);
 
     function publishPost(string memory _message) public {
-        uint postId = posts.length;
         posts.push(Post({
             message: _message,
             author: msg.sender,
@@ -28,7 +27,7 @@ contract MiniSocial {
             timestamp: block.timestamp,
             modifiedAt: 0
         }));
-        emit NewPost(msg.sender, postId, _message);
+        emit NewPost(msg.sender, posts.length - 1, _message);
     }
 
     function getPost(uint index) public view returns (string memory, address, uint, uint, uint, uint) {
@@ -41,39 +40,39 @@ contract MiniSocial {
         return posts.length;
     }
 
-    function likePost(uint postId) public {
-        require(postId < posts.length, "Post does not exist");
-        Post storage post = posts[postId];
-        require(postLikes[postId] != msg.sender, "Already liked this post");
+    function likePost(uint index) public {
+        require(index < posts.length, "Post does not exist");
+        Post storage post = posts[index];
+        require(!likedPosts[msg.sender][index], "Already liked this post");
 
         // Remove dislike if exists
-        if (postDislikes[postId] == msg.sender) {
+        if (dislikedPosts[msg.sender][index]) {
             post.dislikeCount--;
-            postDislikes[postId] = address(0);
+            dislikedPosts[msg.sender][index] = false;
         }
 
         post.likeCount++;
-        postLikes[postId] = msg.sender;
+        likedPosts[msg.sender][index] = true;
     }
 
-    function dislikePost(uint postId) public {
-        require(postId < posts.length, "Post does not exist");
-        Post storage post = posts[postId];
-        require(postDislikes[postId] != msg.sender, "Already disliked this post");
+    function dislikePost(uint index) public {
+        require(index < posts.length, "Post does not exist");
+        Post storage post = posts[index];
+        require(!dislikedPosts[msg.sender][index], "Already disliked this post");
 
         // Remove like if exists
-        if (postLikes[postId] == msg.sender) {
+        if (likedPosts[msg.sender][index]) {
             post.likeCount--;
-            postLikes[postId] = address(0);
+            likedPosts[msg.sender][index] = false;
         }
 
         post.dislikeCount++;
-        postDislikes[postId] = msg.sender;
+        dislikedPosts[msg.sender][index] = true;
     }
 
-    function modifyPost(uint postId, string memory newMessage) public {
-        require(postId < posts.length, "Post does not exist");
-        Post storage post = posts[postId];
+    function modifyPost(uint index, string memory newMessage) public {
+        require(index < posts.length, "Post does not exist");
+        Post storage post = posts[index];
         require(post.author == msg.sender, "You are not the owner of this post");
 
         post.message = newMessage;
