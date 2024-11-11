@@ -28,7 +28,7 @@ Voici les fonctionnalités principales implémentées dans Mini Twitter, conform
 - L’utilisateur ayant publié le message peut le modifier ultérieurement.
 - Cette fonctionnalité est exclusivement réservée à l'auteur du message, et les autres utilisateurs n’ont aucun droit de modification
 
-![image](https://github.com/IMANEELAOUFI/Language-Modeling/assets/118814232/ab325146-1855-4be3-8164-27a6d8adc1b4)
+![image](https://github.com/IMANEELAOUFI/Twitter-App/blob/main/screen.png)
 
   
 ## Sécurité et Confidentialité
